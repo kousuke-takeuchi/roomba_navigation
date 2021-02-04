@@ -1,0 +1,10 @@
+[submodule "libcreate"]
+	path = libcreate
+	url = https://github.com/AutonomyLab/libcreate
+[submodule "serial"]
+	path = serial
+	url = https://github.com/RoverRobotics-forks/serial-ros2
+[submodule "ros2_camsense_x1"]
+	path = ros2_camsense_x1
+	url = https://github.com/rossihwang/ros2_camsense_x1
+
