@@ -8,4 +8,11 @@ install(DIRECTORY config launch
   PATTERN ".svn" EXCLUDE
 )
 
+install(
+  DIRECTORY
+  config
+  launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
 ament_package()
