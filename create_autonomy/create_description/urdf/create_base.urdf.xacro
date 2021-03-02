@@ -115,6 +115,25 @@
     </inertial>
     </link>
 
+    <link name="lidar_link">
+    <visual>
+      <origin xyz=" 0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://create_description/meshes/camsense_x1.dae" />
+      </geometry>
+    </visual>
+    </link>
+
+    <visual>
+      <origin xyz=" 0 0 0.0308" rpy="0 0 0" />
+      <geometry>
+        <xacro:insert_block name="mesh" />
+      </geometry>
+      <material name="black">
+        <color rgba="0.0 0.0 0.0 1.0"/>
+      </material>
+    </visual>
+
     <joint name="base_footprint_joint" type="fixed">
       <origin xyz="0 0 0.017" rpy="0 0 0" />
       <parent link="base_footprint" />
@@ -151,6 +170,12 @@
       <child link="rightfront_cliff_sensor_link" />
     </joint>
 
+    <joint name="base_lidar_joint" type="fixed">
+      <origin xyz="0 0 0.1" rpy="0 0 0" />
+      <parent link="base_link" />
+      <child link="lidar_link" />
+    </joint>
+
     <xacro:create_wheel prefix="left" y_offset="${wheel_separation / 2}" wheel_radius="${wheel_radius}" wheel_width="${wheel_width}"/>
     <xacro:create_wheel prefix="right" y_offset="${wheel_separation / -2}" wheel_radius="${wheel_radius}" wheel_width="${wheel_width}"/>
 
@@ -182,6 +207,7 @@
       <child link="rear_wheel_link"/>
       <axis xyz="0 1 0"/>
     </joint>-->
+
 
     <link name="front_wheel_link">
     <inertial>
