@@ -25,36 +25,36 @@ import math
 import time
 
 # some module-level definitions for the robot commands
-START = chr(128)    # already converted to bytes...
-BAUD = chr(129)     # + 1 byte
-CONTROL = chr(130)  # deprecated for Create
-SAFE = chr(131)
-FULL = chr(132)
-POWER = chr(133)
-SPOT = chr(134)     # Same for the Roomba and Create
-CLEAN = chr(135)    # Clean button - Roomba
-COVER = chr(135)    # Cover demo - Create
-MAX = chr(136)      # Roomba
-DEMO = chr(136)     # Create
-DRIVE = chr(137)    # + 4 bytes
-MOTORS = chr(138)   # + 1 byte
-LEDS = chr(139)     # + 3 bytes
-SONG = chr(140)     # + 2N+2 bytes, where N is the number of notes
-PLAY = chr(141)     # + 1 byte
-SENSORS = chr(142)  # + 1 byte
-FORCESEEKINGDOCK = chr(143)  # same on Roomba and Create
+START = bytes([128])    # already converted to bytes...
+BAUD = bytes([129])     # + 1 byte
+CONTROL = bytes([130])  # deprecated for Create
+SAFE = bytes([131])
+FULL = bytes([132])
+POWER = bytes([133])
+SPOT = bytes([134])     # Same for the Roomba and Create
+CLEAN = bytes([135])    # Clean button - Roomba
+COVER = bytes([135])    # Cover demo - Create
+MAX = bytes([136])      # Roomba
+DEMO = bytes([136])     # Create
+DRIVE = bytes([137])    # + 4 bytes
+MOTORS = bytes([138])   # + 1 byte
+LEDS = bytes([139])     # + 3 bytes
+SONG = bytes([140])     # + 2N+2 bytes, where N is the number of notes
+PLAY = bytes([141])     # + 1 byte
+SENSORS = bytes([142])  # + 1 byte
+FORCESEEKINGDOCK = bytes([143])  # same on Roomba and Create
 # the above command is called "Cover and Dock" on the Create
-DRIVEDIRECT = chr(145)       # Create only
-STREAM = chr(148)       # Create only
-QUERYLIST = chr(149)       # Create only
-PAUSERESUME = chr(150)       # Create only
+DRIVEDIRECT = bytes([145])       # Create only
+STREAM = bytes([148])       # Create only
+QUERYLIST = bytes([149])       # Create only
+PAUSERESUME = bytes([150])       # Create only
 
 #### Sean
 
-SCRIPT = chr(152)
-ENDSCRIPT = chr(153)
-WAITDIST = chr(156)
-WAITANGLE = chr(157)
+SCRIPT = bytes([152])
+ENDSCRIPT = bytes([153])
+WAITDIST = bytes([156])
+WAITANGLE = bytes([157])
 
 # the four SCI modes
 # the code will try to keep track of which mode the system is in,
@@ -167,7 +167,7 @@ def _toBinary( val, numbits ):
     """ prints numbits digits of val in binary """
     if numbits == 0:  return
     _toBinary( val>>1 , numbits-1 )
-    print(val & 0x01),  # print least significant bit)
+    print(val & 0x01)  # print least significant bit)
 
 
 def _fromBinary( s ):
@@ -419,7 +419,7 @@ class SensorFrame:
         slist[25] = self.capacity & 0xFF
         
         # convert to a string
-        s = ''.join([ chr(x) for x in slist ])
+        s = ''.join([ bytes([x]) for x in slist ])
         
         return s
 
@@ -521,7 +521,7 @@ class Create:
     def _write(self, byte):
         if self._debug==True:
             print(ord(byte))
-        self.ser.write(byte.encode('utf8'))
+        self.ser.write(byte)
     
     def getPose(self, dist='cm', angle='deg'):
         """ getPose returns the current estimate of the
@@ -688,10 +688,10 @@ class Create:
         rightHighVal, rightLowVal = _toTwosComplement2Bytes( int(right_cm_sec*10) )
         # send these bytes and set the stored velocities
         self._write( DRIVEDIRECT )
-        self._write( chr(rightHighVal) )
-        self._write( chr(rightLowVal) )
-        self._write( chr(leftHighVal) )
-        self._write( chr(leftLowVal) )
+        self._write( bytes([rightHighVal]) )
+        self._write( bytes([rightLowVal]) )
+        self._write( bytes([leftHighVal]) )
+        self._write( bytes([leftLowVal]) )
     
     def stop(self):
         """ stop calls go(0,0) """
@@ -819,10 +819,10 @@ class Create:
         
         # send these bytes and set the stored velocities
         self._write( DRIVE )
-        self._write( chr(velHighVal) )
-        self._write( chr(velLowVal) )
-        self._write( chr(radiusHighVal) )
-        self._write( chr(radiusLowVal) )
+        self._write( bytes([velHighVal]) )
+        self._write( bytes([velLowVal]) )
+        self._write( bytes([radiusHighVal]) )
+        self._write( bytes([radiusLowVal]) )
 
     
     def setLEDs(self, power_color, power_intensity, play, advance ):
@@ -855,9 +855,9 @@ class Create:
         # send these as bytes
         # print('bytes are', firstByteVal, powercolor, power)
         self._write( LEDS )
-        self._write( chr(firstByteVal) )
-        self._write( chr(powercolor) )
-        self._write( chr(power) )
+        self._write( bytes([firstByteVal]) )
+        self._write( bytes([powercolor]) )
+        self._write( bytes([power]) )
         
         return
 
@@ -880,7 +880,7 @@ class Create:
             packetnumber = 6
         
         self._write( SENSORS )
-        self._write( chr(packetnumber) )
+        self._write( bytes([packetnumber]) )
         
         if packetnumber == 0:
             r = self.ser.read(size=26)
@@ -896,9 +896,9 @@ class Create:
             r = self.ser.read(size=12)
         if packetnumber == 6:
             r = self.ser.read(size=52)
-
-        # r = [ ord(c) for c in r ]   # convert to ints
-        return list(r)
+        
+        r = [ ord(c) for c in r ]   # convert to ints
+        return r
     
     
     def _getRawSensorDataAsList(self, listofsensors):
@@ -908,16 +908,16 @@ class Create:
         """
         numberOfSensors = len(listofsensors)
         self._write( QUERYLIST )
-        self._write( chr(numberOfSensors) )
+        self._write( bytes([numberOfSensors]) )
         resultLength = 0
         for sensornum in listofsensors:
-            self._write( chr(sensornum) )
+            self._write( bytes([sensornum]) )
             resultLength += SENSOR_DATA_WIDTH[sensornum]
 
         r = self.ser.read(size=resultLength)
-        r = list(r)
         # r = [ ord(c) for c in r ]   # convert to ints
-        #print('r is ', r)
+        r = list(r)
+        # print('r is ', r)
         return r
 
     
@@ -953,9 +953,9 @@ class Create:
         self._write( DEMO )
         if demoNumber < 0 or demoNumber > 9:
             # invalid values are equivalent to stopping
-            self._write( chr(255) ) # -1
+            self._write( bytes([255]) ) # -1
         else:
-            self._write( chr(demoNumber) )
+            self._write( bytes([demoNumber]) )
 
     
     def setSong(self, songNumber, songDataList):
@@ -982,21 +982,21 @@ class Create:
         
         # indicate that a song is coming
         self._write( SONG )
-        self._write( chr(songNumber) )
+        self._write( bytes([songNumber]) )
         
         L = min(len(songDataList), 16)
-        self._write( chr(L) )
+        self._write( bytes([L]) )
         
         # loop through the notes, up to 16
         for note in songDataList[:L]:
             # make sure its a tuple, or else we rest for 1/4 second
             if type(note) == type( () ):
                 #more error checking here!
-                self._write( chr(note[0]) )  # note number
-                self._write( chr(note[1]) )  # duration
+                self._write( bytes([note[0]]) )  # note number
+                self._write( bytes([note[1]]) )  # duration
             else:
-                self._write( chr(30) )   # a rest note
-                self._write( chr(16) )   # 1/4 of a second
+                self._write( bytes([30]) )   # a rest note
+                self._write( bytes([16]) )   # 1/4 of a second
                 
         return
 
@@ -1017,7 +1017,7 @@ class Create:
         if songNumber > 15: songNumber = 15
         
         self._write( PLAY )
-        self._write( chr(songNumber) )
+        self._write( bytes([songNumber]) )
         
     
     def playNote(self, noteNumber, duration, songNumber=0):
@@ -1065,7 +1065,7 @@ class Create:
         the sensor data into the next packet to send back.
         """
         self._write( SENSORS )
-        self._write( chr(6) )
+        self._write( bytes([6]) )
         
     def _getNextDataFrame(self):
         """ This function then gets back ALL of
@@ -1078,7 +1078,7 @@ class Create:
     
     def _rawSend( self, listofints ):
         for x in listofints:
-            self._write( chr(x) )
+            self._write( bytes([x]) )
     
     def _rawRecv( self ):
         nBytesWaiting = self.ser.inWaiting()
@@ -1303,11 +1303,8 @@ class Create:
         angle = 0
         update_pose = False
 
-        print("sensor_data_list: ", sensor_data_list)
-
         for sensorNum in sensor_data_list:
             width = SENSOR_DATA_WIDTH[sensorNum]
-            print(width)
             dataGetter = sensorDataInterpreter[sensorNum]
             interpretedData = 0
             
@@ -1438,7 +1435,7 @@ class Create:
             return
         # otherwise, send off the message
         self._write( START )
-        self._write( chr(baudcode) )
+        self._write( bytes([baudcode]) )
         # the recommended pause
         time.sleep(0.1)
         # change the mode we think we're in...
@@ -1451,7 +1448,7 @@ class Create:
     
     def _startScript(self, number_of_bytes):
         self._write( SCRIPT )
-        self._write( chr(number_of_bytes) )
+        self._write( bytes([number_of_bytes]) )
         return
     
     def _endScript(self, timeout=-1.0):
@@ -1467,7 +1464,7 @@ class Create:
         # poll
         while(timeout<0.0 or total < timeout):
             self._write(SENSORS)
-            self._write(chr(7))  # smallest packet value that I can tell
+            self._write(bytes([7]))  # smallest packet value that I can tell
             if self.ser.read(1) != '':
                 break
             time.sleep(interval - 0.5)
@@ -1480,15 +1477,15 @@ class Create:
     def _waitForDistance(self, distance_mm):
         self._write(WAITDIST)
         leftHighVal, leftLowVal = _toTwosComplement2Bytes( distance_mm )
-        self._write( chr(leftHighVal) )
-        self._write( chr(leftLowVal) )
+        self._write( bytes([leftHighVal]) )
+        self._write( bytes([leftLowVal]) )
         return
     
     def _waitForAngle(self, angle_deg):
         self._write(WAITANGLE)
         leftHighVal, leftLowVal = _toTwosComplement2Bytes( angle_deg )
-        self._write( chr(leftHighVal) )
-        self._write( chr(leftLowVal) )
+        self._write( bytes([leftHighVal]) )
+        self._write( bytes([leftLowVal]) )
         return
     
     def turn(self, angle_deg, deg_per_sec=20):
